@@ -1,0 +1,96 @@
+/* Minimal, Zara-ish vibe: generous whitespace, black/white, thin borders, big logo  */
+:root {
+  --text: #111;
+  --muted: #6c757d;
+  --border: #e9ecef;
+}
+
+html, body, #root {
+  height: 100%;
+  background: #fff;
+  color: var(--text);
+  font-feature-settings: "ss01" on, "liga" on;
+}
+
+.navbar-brand {
+  font-family: "Didot", "Bodoni MT", "Playfair Display", serif;
+  letter-spacing: 0.25rem;
+  font-size: clamp(20px, 4vw, 38px);
+  font-weight: 600;
+}
+
+.header-nav .nav-link {
+  text-transform: uppercase;
+  letter-spacing: .12rem;
+  font-size: .85rem;
+}
+
+.hero {
+  position: relative;
+  min-height: 60vh;
+  background: #f8f9fa;
+}
+
+.hero .hero-img {
+  width: 100%;
+  height: 60vh;
+  object-fit: cover;
+}
+
+.hero .hero-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.hero .headline {
+  background: rgba(255,255,255,0.8);
+  padding: 1rem 2rem;
+  border: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: .25rem;
+}
+
+.category-strip .cat {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: .12rem;
+}
+
+.card.product-card {
+  border-radius: 0;
+  border-color: var(--border);
+}
+
+.card.product-card .card-img-top {
+  aspect-ratio: 3/4;
+  object-fit: cover;
+}
+
+.price {
+  font-size: .95rem;
+}
+
+a, a:visited { color: currentColor; }
+a:hover { opacity: .7; }
+
+.btn-dark {
+  border-radius: 0;
+}
+.btn-outline-dark {
+  border-radius: 0;
+}
+
+.quantity-control .btn {
+  border-radius: 0;
+}
+
+@media (max-width: 576px) {
+  .hero .headline {
+    padding: .6rem 1rem;
+    letter-spacing: .18rem;
+  }
+}

@@ -8,6 +8,10 @@ import Cart from './pages/Cart.jsx';
 import Checkout from './pages/Checkout.jsx';
 import NotFound from './pages/NotFound.jsx';
 
+// NEW imports
+import Login from './pages/Login.jsx';
+import Signup from './pages/Signup.jsx';
+
 export default function App() {
   return (
     <>
@@ -23,6 +27,12 @@ export default function App() {
             <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
+
+            {/* NEW routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+
+            {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Container>
@@ -30,7 +40,7 @@ export default function App() {
 
       {/* Footer */}
       <footer className="text-center border-top mt-5 text-muted py-4">
-        © {new Date().getFullYear()} ZARA Lite — Modern Demo
+        © {new Date().getFullYear()} NIVORA - All Rights Reserved
       </footer>
     </>
   );

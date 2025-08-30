@@ -1,75 +1,63 @@
-import { createContext, useContext, useMemo, useReducer } from 'react'
+import { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "../supabaseClient";
 
-const CartContext = createContext()
-
-function reducer(state, action) {
-  switch (action.type) {
-    case 'ADD': {
-      const { item, qty } = action.payload
-      const existing = state.items[item.id]
-      const newQty = (existing?.qty || 0) + (qty || 1)
-      return {
-        ...state,
-        items: {
-          ...state.items,
-          [item.id]: { item, qty: newQty }
-        }
-      }
-    }
-    case 'REMOVE': {
-      const id = action.payload
-      const copy = { ...state.items }
-      delete copy[id]
-      return { ...state, items: copy }
-    }
-    case 'SET_QTY': {
-      const { id, qty } = action.payload
-      if (qty <= 0) {
-        const copy = { ...state.items }
-        delete copy[id]
-        return { ...state, items: copy }
-      }
-      return {
-        ...state,
-        items: {
-          ...state.items,
-          [id]: { ...state.items[id], qty }
-        }
-      }
-    }
-    case 'CLEAR':
-      return { items: {} }
-    default:
-      return state
-  }
-}
+const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  const [state, dispatch] = useReducer(reducer, { items: {} })
+  const [items, setItems] = useState([]);
 
-  const api = useMemo(() => {
-    const entries = Object.values(state.items)
-    const subtotal = entries.reduce((sum, { item, qty }) => sum + item.price * qty, 0)
-    const tax = Math.round(subtotal * 0.05) // static 5% tax
-    const total = subtotal + tax
-    const count = entries.reduce((sum, it) => sum + it.qty, 0)
+  // Load cart from Supabase
+  useEffect(() => {
+    const fetchCart = async () => {
+      const { data, error } = await supabase
+        .from("cart")
+        .select("*, products(*)"); // join product details
+      if (!error) {
+        setItems(data.map(row => ({
+          ...row.products,
+          qty: row.qty
+        })));
+      }
+    };
+    fetchCart();
+  }, []);
 
-    return {
-      entries,
-      subtotal,
-      tax,
-      total,
-      count,
-      add(item, qty = 1) { dispatch({ type: 'ADD', payload: { item, qty } }) },
-      setQty(id, qty) { dispatch({ type: 'SET_QTY', payload: { id, qty } }) },
-      remove(id) { dispatch({ type: 'REMOVE', payload: id }) },
-      clear() { dispatch({ type: 'CLEAR' }) }
+  const add = async (product) => {
+    // Check if product exists
+    const existing = items.find((p) => p.id === product.id);
+
+    if (existing) {
+      // Update qty
+      await supabase
+        .from("cart")
+        .update({ qty: existing.qty + 1 })
+        .eq("product_id", product.id);
+
+      setItems(items.map((p) =>
+        p.id === product.id ? { ...p, qty: p.qty + 1 } : p
+      ));
+    } else {
+      // Insert new
+      await supabase
+        .from("cart")
+        .insert([{ product_id: product.id, qty: 1 }]);
+
+      setItems([...items, { ...product, qty: 1 }]);
     }
-  }, [state])
+  };
 
-  return <CartContext.Provider value={api}>{children}</CartContext.Provider>
+  const remove = async (productId) => {
+    await supabase.from("cart").delete().eq("product_id", productId);
+    setItems(items.filter((p) => p.id !== productId));
+  };
+
+  return (
+    <CartContext.Provider value={{ items, add, remove }}>
+      {children}
+    </CartContext.Provider>
+  );
 }
 
 export function useCart() {
-  return useContext(CartContext)
+  return useContext(CartContext);
 }
